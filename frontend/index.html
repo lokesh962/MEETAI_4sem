@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>MeetAI — GPU-Powered Meeting Platform</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="css/index.css"/>
+</head>
+<body>
+
+<!-- Background grid -->
+<div class="bg-grid"></div>
+<div class="bg-glow glow1"></div>
+<div class="bg-glow glow2"></div>
+
+<!-- Nav -->
+<nav class="nav">
+  <div class="nav-brand">
+    <span class="logo-icon">◉</span>
+    <span class="logo-text">MeetAI</span>
+  </div>
+  <div class="nav-badge" id="gpuBadge">
+    <span class="pulse-dot"></span>
+    Detecting GPU…
+  </div>
+</nav>
+
+<!-- Hero -->
+<section class="hero">
+  <h1 class="hero-title">
+    Meetings that<br/>
+    <span class="highlight">listen, transcribe</span><br/>
+    & summarize
+  </h1>
+  <p class="hero-sub">
+    Powered by <strong>OpenAI Whisper</strong> + <strong>DistilBART</strong> running entirely on your GPU.<br/>
+    Every word stays on your machine.
+  </p>
+
+  <!-- Action Cards -->
+  <div class="action-grid">
+
+    <!-- Create Meeting -->
+    <div class="card card-primary">
+      <div class="card-icon">✦</div>
+      <h2>New Meeting</h2>
+      <p>Start instantly and invite others with a room code.</p>
+      <div class="form-group">
+        <input type="text" id="meetingTitle" placeholder="Meeting title…" class="input-field"/>
+      </div>
+      <div class="form-group">
+        <input type="text" id="hostName" placeholder="Your name…" class="input-field"/>
+      </div>
+      <button class="btn btn-primary" onclick="createMeeting()">
+        <span>Start Meeting</span>
+        <span class="btn-arrow">→</span>
+      </button>
+    </div>
+
+    <!-- Join Meeting -->
+    <div class="card card-secondary">
+      <div class="card-icon">⊕</div>
+      <h2>Join Meeting</h2>
+      <p>Enter the 8-character room code to join an existing meeting.</p>
+      <div class="form-group">
+        <input type="text" id="joinCode" placeholder="Room code (e.g. AB12CD34)" class="input-field code-input"
+               maxlength="8" oninput="this.value=this.value.toUpperCase()"/>
+      </div>
+      <div class="form-group">
+        <input type="text" id="joinName" placeholder="Your name…" class="input-field"/>
+      </div>
+      <button class="btn btn-secondary" onclick="joinMeeting()">
+        <span>Join Meeting</span>
+        <span class="btn-arrow">→</span>
+      </button>
+    </div>
+
+  </div>
+
+  <!-- Error message -->
+  <div id="errorMsg" class="error-msg" style="display:none"></div>
+</section>
+
+<!-- Features -->
+<section class="features">
+  <div class="feat-grid">
+    <div class="feat">
+      <div class="feat-num">01</div>
+      <h3>Whisper Medium</h3>
+      <p>State-of-the-art multilingual speech recognition. Runs entirely on your RTX GPU via CUDA.</p>
+    </div>
+    <div class="feat">
+      <div class="feat-num">02</div>
+      <h3>DistilBART Summary</h3>
+      <p>Neural abstractive summarization. Reads the full transcript and writes a coherent summary.</p>
+    </div>
+    <div class="feat">
+      <div class="feat-num">03</div>
+      <h3>Real-time Captions</h3>
+      <p>See live subtitles as everyone speaks. Transcripts auto-scroll and are searchable.</p>
+    </div>
+    <div class="feat">
+      <div class="feat-num">04</div>
+      <h3>WebRTC Video</h3>
+      <p>Peer-to-peer HD video and audio. Low latency, no relay servers needed on a local network.</p>
+    </div>
+    <div class="feat">
+      <div class="feat-num">05</div>
+      <h3>Export Everything</h3>
+      <p>Download the full transcript and AI summary as plain text. Keep records your way.</p>
+    </div>
+    <div class="feat">
+      <div class="feat-num">06</div>
+      <h3>Zero Cloud</h3>
+      <p>Your voice never leaves your machine. No subscriptions, no API costs, no limits.</p>
+    </div>
+  </div>
+</section>
+
+<!-- Status indicator -->
+<div class="status-bar" id="statusBar">
+  <div class="status-item" id="sWhisper">
+    <span class="status-dot loading"></span>
+    <span>Whisper: loading…</span>
+  </div>
+  <div class="status-item" id="sSummarizer">
+    <span class="status-dot loading"></span>
+    <span>Summarizer: loading…</span>
+  </div>
+  <div class="status-item" id="sDevice">
+    <span class="status-dot loading"></span>
+    <span>Device: detecting…</span>
+  </div>
+</div>
+
+<script src="js/index.js"></script>
+</body>
+</html>

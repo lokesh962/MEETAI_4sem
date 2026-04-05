@@ -1,0 +1,25 @@
+# MeetAI — Python Dependencies
+# Install with: pip install -r requirements.txt
+
+# Web framework
+flask==3.0.3
+flask-cors==4.0.1
+flask-socketio==5.3.6
+
+# Whisper — local speech-to-text (GPU accelerated)
+openai-whisper==20250625
+
+# Transformers — local BART summarization (GPU accelerated)
+transformers==4.40.2
+# torch and torchaudio are installed by setup.bat with CUDA support
+#  (the Windows batch script uses the PyTorch index-url)
+
+# Audio processing
+ffmpeg-python==0.2.0
+soundfile==0.12.1
+librosa==0.10.1
+
+# Utilities
+python-socketio==5.11.2
+eventlet==0.35.2
+numpy>=1.24.0

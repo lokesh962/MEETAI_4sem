@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>MeetAI — Meeting Room</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="css/meeting.css"/>
+</head>
+<body>
+
+<!-- ── Header ── -->
+<header class="header">
+  <div class="header-left">
+    <a href="/" class="logo">◉ MeetAI</a>
+    <div class="room-pill">
+      <span id="roomTitle">Loading…</span>
+      <span class="divider">|</span>
+      <span id="roomId">─────</span>
+      <button class="copy-btn" onclick="copyRoomId()" title="Copy room code">⧉</button>
+    </div>
+  </div>
+  <div class="header-center">
+    <div class="timer" id="timer">00:00</div>
+  </div>
+  <div class="header-right">
+    <div class="ai-status" id="aiStatus">
+      <span class="ai-dot loading"></span>
+      <span id="aiStatusText">AI Loading…</span>
+    </div>
+    <button class="btn-icon btn-danger" id="endBtn" onclick="endMeeting()" title="End Meeting">
+      ✕ End
+    </button>
+  </div>
+</header>
+
+<!-- ── Main layout ── -->
+<main class="main-layout">
+
+  <!-- Left: Video grid + controls -->
+  <div class="video-section">
+    <div class="video-grid" id="videoGrid">
+      <!-- Local video -->
+      <div class="video-tile" id="localTile">
+        <video id="localVideo" autoplay muted playsinline></video>
+        <div class="video-label">
+          <span id="localName">You</span>
+          <span class="mic-indicator" id="localMicIcon">🎙</span>
+        </div>
+        <div class="video-overlay" id="localOverlay"></div>
+      </div>
+    </div>
+
+    <!-- Controls bar -->
+    <div class="controls-bar">
+      <button class="ctrl-btn active" id="btnMic" onclick="toggleMic()" title="Toggle Microphone">
+        <span class="ctrl-icon" id="micIcon">🎙</span>
+        <span class="ctrl-label">Mic</span>
+      </button>
+      <button class="ctrl-btn active" id="btnCam" onclick="toggleCamera()" title="Toggle Camera">
+        <span class="ctrl-icon" id="camIcon">📷</span>
+        <span class="ctrl-label">Camera</span>
+      </button>
+      <button class="ctrl-btn" id="btnTranscribe" onclick="toggleTranscription()" title="Toggle Live Transcription">
+        <span class="ctrl-icon">◎</span>
+        <span class="ctrl-label">Transcribe</span>
+      </button>
+      <button class="ctrl-btn" id="btnUploadVideo" onclick="uploadVideo()" title="Upload Video for Transcription">
+        <span class="ctrl-icon">📹</span>
+        <span class="ctrl-label">Upload Video</span>
+      </button>
+      <button class="ctrl-btn btn-summarize" id="btnSummarize" onclick="requestSummary()" title="Generate AI Summary">
+        <span class="ctrl-icon">✦</span>
+        <span class="ctrl-label">Summarize</span>
+      </button>
+      <button class="ctrl-btn" id="btnChat" onclick="togglePanel('chat')" title="Chat">
+        <span class="ctrl-icon">💬</span>
+        <span class="ctrl-label" id="chatLabel">Chat</span>
+      </button>
+      <button class="ctrl-btn" id="btnExport" onclick="exportData()" title="Export Transcript">
+        <span class="ctrl-icon">⬇</span>
+        <span class="ctrl-label">Export</span>
+      </button>
+    </div>
+
+    <!-- Live caption bar -->
+    <div class="caption-bar" id="captionBar" style="display:none">
+      <span class="caption-speaker" id="captionSpeaker">─</span>
+      <span class="caption-text" id="captionText">Transcription active…</span>
+    </div>
+  </div>
+
+  <!-- Right: Sidebar panels -->
+  <aside class="sidebar" id="sidebar">
+
+    <!-- Panel tabs -->
+    <div class="sidebar-tabs">
+      <button class="stab active" onclick="switchTab('transcript')" id="tabTranscript">Transcript</button>
+      <button class="stab" onclick="switchTab('summary')" id="tabSummary">Summary</button>
+      <button class="stab" onclick="switchTab('chat')" id="tabChat">Chat</button>
+    </div>
+
+    <!-- Transcript panel -->
+    <div class="panel active" id="panelTranscript">
+      <div class="panel-header">
+        <span>Live Transcript</span>
+        <span class="entry-count" id="entryCount">0 segments</span>
+      </div>
+      <div class="transcript-scroll" id="transcriptScroll">
+        <div class="empty-state" id="transcriptEmpty">
+          <div class="empty-icon">◎</div>
+          <p>Transcript will appear here<br/>once you start speaking.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Summary panel -->
+    <div class="panel" id="panelSummary">
+      <div class="panel-header">
+        <span>AI Summary</span>
+        <button class="btn-sm" onclick="requestSummary()">Generate ✦</button>
+      </div>
+      <div class="summary-scroll" id="summaryScroll">
+        <div class="empty-state" id="summaryEmpty">
+          <div class="empty-icon">✦</div>
+          <p>Click <strong>Summarize</strong> or the button above<br/>to generate an AI meeting summary.</p>
+          <p class="small-note">Uses DistilBART · Runs on your GPU · Zero cloud</p>
+        </div>
+        <pre class="summary-text" id="summaryText" style="display:none"></pre>
+      </div>
+    </div>
+
+    <!-- Chat panel -->
+    <div class="panel" id="panelChat">
+      <div class="panel-header"><span>In-Meeting Chat</span></div>
+      <div class="chat-scroll" id="chatScroll">
+        <div class="empty-state">
+          <div class="empty-icon">💬</div>
+          <p>No messages yet.</p>
+        </div>
+      </div>
+      <div class="chat-input-row">
+        <input type="text" id="chatInput" placeholder="Type a message…" class="chat-input"
+               onkeydown="if(event.key==='Enter') sendChat()"/>
+        <button class="btn-send" onclick="sendChat()">→</button>
+      </div>
+    </div>
+
+  </aside>
+</main>
+
+<!-- Join modal (shown before entering room) -->
+<div class="modal-backdrop" id="joinModal">
+  <div class="modal">
+    <div class="modal-logo">◉ MeetAI</div>
+    <h2 id="modalTitle">Joining Meeting…</h2>
+    <p id="modalSubtitle">Enter your display name to continue</p>
+    <input type="text" id="modalName" placeholder="Your name" class="input-field" maxlength="30"
+           onkeydown="if(event.key==='Enter') joinFromModal()"/>
+    <button class="btn btn-primary" onclick="joinFromModal()">
+      <span>Enter Meeting</span><span class="btn-arrow">→</span>
+    </button>
+  </div>
+</div>
+
+<!-- Summary loading overlay -->
+<div class="summary-overlay" id="summaryOverlay" style="display:none">
+  <div class="summary-loader">
+    <div class="loader-ring"></div>
+    <p>Running DistilBART on GPU…</p>
+    <p class="small-note">Summarizing transcript · Please wait</p>
+  </div>
+</div>
+
+<!-- Toast notifications -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- Hidden file input for video upload -->
+<input type="file" id="videoFileInput" accept="video/*" style="display:none" onchange="handleVideoUpload()"/>
+
+<script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+<script src="js/meeting.js"></script>
+</body>
+</html>
